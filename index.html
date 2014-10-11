@@ -1,0 +1,220 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>WebIOPi | Light Control</title>
+        <script type="text/javascript" src="/webiopi.js"></script>
+        <script type="text/javascript">
+
+        webiopi().ready(init);
+
+ 	function init(){
+		
+		//bind mode button to togglemode function
+		$("#mode").on("click",toggleMode);
+
+		updateUI();
+		setInterval(updateUI,5000);
+			              
+       		 };
+
+	function updateUI(){
+		setHours();
+		updateAuto();
+		getUpdate();
+		}
+	
+	function toggleMorning(){
+		if($("#morning").attr("checked")=="checked"){
+			var val="true";
+			}
+		else{
+			var val="false";
+		}
+		webiopi().callMacro("morningLights",val);
+	}
+
+	function getUpdate(){
+		webiopi().callMacro("update",[],updateRandMorn)
+
+		}
+
+	function updateRandMorn(macro, args, response){
+		var togs=response.split(":");
+		if(togs[0]=="1"){
+			$("#morning").attr("checked")="checked"}
+		else{
+			$("#morning").attr("checked")="unchecked"}
+		if (togs[1]=="1"){
+			$("#random").attr("checked")="checked"}
+		else{
+			$("#random").attr("checked")="unchecked"}
+		}
+
+
+
+	function toggleRandom(){
+		webiopi().callMacro("toggleRandom");
+		}
+
+	function setHours(){
+		webiopi().callMacro("getLightHours",[],updateLightHours);
+		}
+	
+
+	//define function to update the auto on off times from python and switch to auto after it is run
+	function updateLightHours(macro,args,response){
+		var hours=response.split(":");
+		$("#inputOn").val(hours[0]);
+		$("#inputOnMin").val(hours[1]);
+		$("#inputOff").val(hours[2]);
+		$("#inputOffMin").val(hours[3]);
+		$("#sendButton").attr("class","STATIC");
+					}
+
+	//create sendButton
+	function callSendButton(){
+		$("#sendButton").attr("class","ON");
+		var hours=[$("#inputOn").val(),$("#inputOnMin").val(),$("#inputOff").val(),$("#inputOffMin").val()];
+		webiopi().callMacro("setLightHours",hours,updateLightHours);
+		}
+			
+
+	
+	function updateAuto(){
+		var args=[];
+		webiopi().callMacro("autoManual",args,modeCallBack);
+		}	
+		
+	function toggleMode(){
+		var args=[]
+		webiopi().callMacro("toggleAuto",args,modeCallBack);
+		}	
+
+	function modeCallBack(toggleAuto,args,response){
+		if (response=="MANUAL"){
+			$("#mode").css("background-color","Blue");
+			$("#mode").text("MANUAL");}
+		else if (response=="AUTO"){
+		$("#mode").css("background-color","Red");
+		$("#mode").text("AUTO");}
+		}
+
+	
+
+	function resetOnOff(){
+	$("#all").attr("class","NEUTRAL");
+		}
+
+        
+	function toggleLounge(){
+		if($("#lounge").attr("class")=="ON"){
+			var args=[1,1];
+			webiopi().callMacro("lightoff",args,offCallBack);
+			}
+		else{
+			var args=[1,1];
+			webiopi().callMacro("light",args,onCallBack);
+			}
+		}
+
+	
+	function onCallBack(){
+		$("#lounge").attr("class","ON");
+		resetOnOff();
+}
+	function offCallBack(){
+		$("#lounge").attr("class","OFF");
+		resetOnOff();
+}
+
+	function toggleHall(){
+		if($("#hall").attr("class")=="ON"){
+			var args=[1,2];
+			webiopi().callMacro("lightoff",args,hallOffCallBack);
+			}
+		else{
+			var args=[1,2];
+			webiopi().callMacro("light",args,hallOnCallBack);
+			}
+		}
+
+	function hallOnCallBack(){
+		$("#hall").attr("class","ON");
+		resetOnOff();
+}
+	function hallOffCallBack(){
+		$("#hall").attr("class","OFF");
+		resetOnOff();
+}
+
+	function toggleAll(){
+		if($("#all").attr("class")=="ON"){
+			var args=[2];
+			webiopi().callMacro("allOff",args,alloffCallBack);
+			}
+		else{
+			var args=[2];
+			webiopi().callMacro("allOn",args,allonCallBack);
+			}
+		}  
+	
+	function allonCallBack(){
+		$("#lounge").attr("class","ON");
+		$("#hall").attr("class","ON");
+		$("#all").attr("class","ON");
+		
+			}
+
+	function alloffCallBack(){
+		$("#lounge").attr("class","OFF");
+		$("#hall").attr("class","OFF");
+		$("#all").attr("class","OFF");
+		}
+
+        </script>
+        <style type="text/css">
+                button {
+                        display: block;
+                        margin: 5px 5px 5px 5px;
+                        width: 240px;
+                        height: 45px;
+                        font-size: 24pt;
+                        font-weight: bold;
+                        color: white;
+			
+                }
+		.auto{ background-color:red;
+		}
+		.manual{background-color:black;}
+
+		button.ON{background-color:red;}
+		button.OFF{background-color:black;}
+		button.NEUTRAL{background-color:blue;}
+		button.STATIC{background-color:grey;}
+		
+			
+			
+
+                
+                
+        </style>
+</head>
+<body>
+<div align="left">
+Morning Lights<input type="checkbox" id="morning" checked="checked" onchange="toggleMorning()"/></br>
+Random<input type="checkbox" id="rand" checked="checked" onchange="toggleRandom()"/>
+</div>
+<div align="center">
+Turn On at:<input type="text" id="inputOn" size=3/><input type="text" id="inputOnMin" size=3/><br/>
+Turn Off at:<input type="text" id="inputOff" size=3/><input type="text" id="inputOffMin" size=3/><br/>
+<div id="controls">
+<button id="sendButton" class="STATIC" onclick="callSendButton()">Send</button>
+<button id="lounge" class="NEUTRAL" onclick="toggleLounge()">Lounge</button>
+<button id="hall" class="NEUTRAL" onclick="toggleHall()">Hall</button>
+<button id="all" class="NEUTRAL" onclick="toggleAll()">All</button>
+</div>
+<div>Mode</div><button type="button" id="mode" class="auto">AUTO</button>
+</div>
+</body>
+</html>
