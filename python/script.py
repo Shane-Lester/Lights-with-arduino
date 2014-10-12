@@ -3,21 +3,21 @@ import datetime
 import random
 import time
 from webiopi.devices.serial import Serial
-serial=Serial("/dev/ttyACM0",9600)
 
 
-
-HOUR_ON,MIN_ON=19,15#Turn Light ON at 17:15 (so can't be negative
-HOUR_OFF,MIN_OFF = 23,30# Turn Light OFF at 23:00
+HOUR_ON,MIN_ON=18,45#Turn Light ON at 17:15 (so can't be negative
+HOUR_OFF,MIN_OFF = 23,45# Turn Light OFF at 23:00
 BASE_ON=MIN_ON
 BASE_OFF=MIN_OFF
 MORN_ON,MORNMIN_ON=6,30
 MORN_OFF,MORNMIN_OFF=7,0
 AUTOMAN = "AUTO"
+hall,lounge,upstairs=0,0,0
 rand=True
 morning=1
 serial=Serial("/dev/ttyACM0",9600)
-time.sleep(20)
+time.sleep(2)
+
 if (rand==True):
 
     MIN_ON=BASE_ON+random.randint(-15,15)
@@ -32,24 +32,25 @@ if (rand==True):
             MIN_OFF=59
 
 active = 0
-numberLights=2 #how many lights are plugged in
+numberLights=3 #how many lights are plugged in
 # setup function is automatically called at WebIOPi startup
 def setup():
-    global active
-    serial=Serial("/dev/ttyACM0",9600)
+    global active    
    
     # retrieve current datetime
     now = datetime.datetime.now()
    
 
     # test if we are between ON time and tun the light ON
-    if ((now.hour >= HOUR_ON) and (now.hour <= HOUR_OFF)):
-        if ((now.minute >= MIN_ON)):
+    switch_on=compare_time(now,HOUR_ON,MIN_ON,HOUR_OFF,MIN_OFF)
+    if (switch_on):
+            webiopi.debug("going on at setup")
             active=1# unique situation- only 1 if should be active at setup
-            serial.writeString("A")
-            serial.writeString("B")
-            serial.writeString("C")
-             
+            #serial.writeString("A")
+            #serial.writeString("B")
+            #serial.writeString("C")
+    else:
+        webiopi.debug("off at setup")
 
        
 # loop function is repeatedly called by WebIOPi 
@@ -62,14 +63,27 @@ def loop():
     global morning
     global rand
     
+    
     # retrieve current datetime
     now = datetime.datetime.now()
+
+    buffer=[]
+    incoming=serial.readString()
+
+    webiopi.debug("I'm reading")
+    
+    while(incoming):
+        buffer.append(incoming)
+        room(buffer)
+        #webiopi.debug(incoming)
+        incoming=serial.readString()
+        
     
     if (active==1):
         webiopi.sleep(0.5)
         allOn(numberLights)#if active at time of initiation light em up
         webiopi.debug("setup says on!")
-        light(1,3)
+        #light(1,3)
         active=2 #stop it repeating
     elif (active==0):
         webiopi.sleep(0.5)
@@ -79,13 +93,13 @@ def loop():
         active=2#stop repeating
     
     if ((morning) and (now.hour==MORN_ON) and (now.minute==MORNMIN_ON) and (now.second==0)):
-            webiopi.debug(morning)
+            webiopi.debug("morning")
             allOn(numberLights)
 
     if ((now.hour==MORN_OFF) and (now.minute==MORNMIN_OFF) and (now.second==0)):
             #always switch off in the morning
             allOff(numberLights)
-            lightoff(1,3)
+            #lightoff(1,3)
 
 
       #at 1 am randomise the time if rand button ticked
@@ -115,7 +129,8 @@ def loop():
         webiopi.debug("Time to go off")
         allOff(numberLights)
         lightoff(1,3)
-   
+        
+    webiopi.debug("lounge %d hall %d upstairs %d"%(lounge,hall,upstairs))
     # gives CPU some time before looping again
     webiopi.sleep(1.0)
     
@@ -125,27 +140,86 @@ def destroy():
     #GPIO.digitalWrite(LIGHT, GPIO.LOW)
     return
 
+def room(raw):
+    incoming=raw.pop()
+    webiopi.debug("Room ")
+    webiopi.debug(incoming)
+    if (incoming=='a'):
+        lounge=0
+        return
+    elif (incoming=='b'):
+        hall=0
+        return
+    elif (incoming=='c'):
+        upstairs=0
+        return
+    elif(incoming=='A'):
+        lounge=1
+        return
+    elif(incoming=='B'):
+        hall=1
+        return
+    elif(incoming=='C'):
+        upstairs=1
+        return
+    
+
+def compare_time(now,start_hour,start_min,stop_hour,stop_min):
+    on=datetime.datetime.now().replace(hour=start_hour,minute=start_min).time()
+    off=datetime.datetime.now().replace(hour=stop_hour,minute=stop_min).time()
+    if (on<=now.time()<off):
+        return True
+    else:
+        return False
+
+@webiopi.macro
+def sendLounge():
+    global lounge
+    webiopi.debug("lounge %s"%(str(lounge)))
+    return lounge
+
+@webiopi.macro
+def sendHall():
+    global hall
+    webiopi.debug("hall %s"%(str(hall)))
+    return hall
+
+@webiopi.macro
+def sendUpstairs():
+    global upstairs
+    webiopi.debug("upstairs %d"%(upstairs))
+    return upstairs
+
 @webiopi.macro
 def update():
+    global lounge,hall,upstairs
     global morning
     global rand
     if (rand==True):
         random=1
     else:
         random=0
+
     return "%d:%d"%(morning,random)
 
 @webiopi.macro
 def light(num1,num2):
+    global lounge
+    global hall
+    global upstairs
     if (int(num1)==1):
         if (int(num2)==1):
             serial.writeString("A")
+            lounge=1
+            webiopi.debug("lounge is now on and %d"%(lounge))
             webiopi.sleep(0.1)
         if (int(num2)==2):
             serial.writeString("B")
+            hall=1
             webiopi.sleep(0.1)
         if (int(num2)==3):
             serial.writeString("C")
+            upstairs=1
             webiopi.sleep(0.1)
     return
 
@@ -162,15 +236,21 @@ def morningLights(ison):
 
 @webiopi.macro
 def lightoff(num1,num2):
+    global lounge
+    global hall
+    global upstairs
     if (int(num1)==1):
         if (int(num2)==1):
             serial.writeString("a")
+            lounge=0
             webiopi.sleep(0.1)
         if (int(num2)==2):
             serial.writeString("b")
+            hall=0
             webiopi.sleep(0.1)
         if (int(num2)==3):
             serial.writeString("c")
+            upstairs=0
             webiopi.sleep(0.1)
     return
 
@@ -213,6 +293,7 @@ def setLightHours(hour,minute,hourOff,minuteOff):
 @webiopi.macro
 def autoManual():
     global AUTOMAN
+    webiopi.debug("AUTOMAN")
     if (AUTOMAN=="AUTO"):
         return "AUTO"
     elif(AUTOMAN=="MANUAL"):
@@ -235,12 +316,12 @@ def toggleAuto():#data is the js sent mode= auto or manual
 
 @webiopi.macro
 def allOn(number):
-    global AUTOMAN
+    #global AUTOMAN
     seq= int(number)
     for f in range(seq):
         light(1,f+1)
         webiopi.sleep(0.1)
-        light(1,f+1)
+        #light(1,f+1)
     return
 
 @webiopi.macro
@@ -249,6 +330,6 @@ def allOff(number):
     for f in range(seq):           
         lightoff(1,f+1)
         webiopi.sleep(0.1)
-        lightoff(1,f+1)
+        #lightoff(1,f+1)
         
     return

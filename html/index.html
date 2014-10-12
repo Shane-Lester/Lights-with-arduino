@@ -12,7 +12,6 @@
 		
 		//bind mode button to togglemode function
 		$("#mode").on("click",toggleMode);
-
 		updateUI();
 		setInterval(updateUI,5000);
 			              
@@ -22,6 +21,9 @@
 		setHours();
 		updateAuto();
 		getUpdate();
+		getLounge();
+		getHall();
+		getUpstairs();
 		}
 	
 	function toggleMorning(){
@@ -41,15 +43,40 @@
 
 	function updateRandMorn(macro, args, response){
 		var togs=response.split(":");
-		if(togs[0]=="1"){
+		if(togs[0]=='1'){
 			$("#morning").attr("checked")="checked"}
 		else{
 			$("#morning").attr("checked")="unchecked"}
-		if (togs[1]=="1"){
+		if (togs[1]=='1'){
 			$("#random").attr("checked")="checked"}
 		else{
 			$("#random").attr("checked")="unchecked"}
 		}
+
+	function getLounge(){
+		webiopi().callMacro("sendLounge",[],setLounge)}
+
+	function setLounge(sendLounge,args,response){
+		if (response=="1"){
+			$("#lounge").attr("class","ON");
+			}
+		else{$("#lounge").attr("class","OFF");}
+		}
+
+	function getHall(){
+		webiopi().callMacro("sendHall",[],setHall)}
+
+	function setHall(sendHall,args,response){
+		if (response=="1"){
+			$("#hall").attr("class","ON");}
+		else{$("#hall").attr("class","OFF");}
+		}
+			
+
+
+
+		
+	
 
 
 
