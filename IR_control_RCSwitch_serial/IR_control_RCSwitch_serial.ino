@@ -43,9 +43,8 @@ void loop()   /*----( LOOP: RUNS CONSTANTLY )----*/
   
   int which=0;// nothing to do
   if (irrecv.decode(&results)) // have we received an IR signal?
-
        {
-    //Serial.println(results.value, HEX);  //UN Comment to see raw values
+    Serial.println(results.value, HEX);  //UN Comment to see raw values
     which=translateIR(); 
     irrecv.resume(); // receive the next value
   }  
@@ -57,15 +56,15 @@ void loop()   /*----( LOOP: RUNS CONSTANTLY )----*/
       which=0; 
       switch (c){
         case'a':
-         which=(which|1);
+         which=1;
          break;
          
         case'b':
-         which=(which|2);
+         which=2;
          break;
         
         case'c':
-         which=(which|4);
+         which=4;
          break;
          
         case'o':
@@ -80,15 +79,15 @@ void loop()   /*----( LOOP: RUNS CONSTANTLY )----*/
       which=8;
         switch (c){
         case'A':
-         which=(which|1);
+         which=9;
          break;
          
         case'B':
-         which=(which|2);
+         which=10;
          break;
         
         case'C':
-         which=(which|4);
+         which=12;
          break;
          
         case'O':
@@ -104,7 +103,7 @@ void loop()   /*----( LOOP: RUNS CONSTANTLY )----*/
   
   if (which){// if which isn't zero then there's something to do
       act(which);//call the action loop
-      delay(50);
+      delay(100);
       which=0;
   }
   
@@ -244,11 +243,12 @@ int translateIR() // takes action based on IR code received
 
   default: 
     //Serial.println(" other button   ");
+    return 0;
     break;
 
   }
 
-  delay(200);
+  delay(500);
 
 
 } //END translateIR

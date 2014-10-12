@@ -67,16 +67,18 @@ def loop():
     # retrieve current datetime
     now = datetime.datetime.now()
 
-    buffer=[]
-    incoming=serial.readString()
-
-    webiopi.debug("I'm reading")
-    
-    while(incoming):
-        buffer.append(incoming)
-        room(buffer)
-        #webiopi.debug(incoming)
-        incoming=serial.readString()
+  
+    if (serial.available()>0):
+        data=serial.readString()
+        webiopi.debug("I've just read %s"%(data))
+        lines=data.split("\r\n")
+        webiopi.debug("lines is %s"%(lines))
+        count=len(lines)
+        lines=lines[0:count-1]#last line will be empty so remove it
+        for info in lines:
+            webiopi.debug("data is %s"%(info))
+            room(info)
+            
         
     
     if (active==1):
@@ -140,8 +142,10 @@ def destroy():
     #GPIO.digitalWrite(LIGHT, GPIO.LOW)
     return
 
-def room(raw):
-    incoming=raw.pop()
+def room(incoming):
+    global lounge
+    global hall
+    global upstairs
     webiopi.debug("Room ")
     webiopi.debug(incoming)
     if (incoming=='a'):
