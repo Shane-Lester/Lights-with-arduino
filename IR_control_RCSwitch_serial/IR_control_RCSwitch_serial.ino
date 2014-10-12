@@ -31,7 +31,7 @@ decode_results results;            // create instance of 'decode_results'
 void setup()   /*----( SETUP: RUNS ONCE )----*/
 {
   Serial.begin(9600);
-  Serial.println("IR Receiver Raw Data + Button Decode Test");
+  //Serial.println("IR Receiver Raw Data + Button Decode Test");
   irrecv.enableIRIn(); // Start the receiver
   mySwitch.enableTransmit(10);//RC switch setup
 
@@ -52,7 +52,7 @@ void loop()   /*----( LOOP: RUNS CONSTANTLY )----*/
   
   if (Serial.available()){
      char c=Serial.read();
-     Serial.println(c);
+     //Serial.println(c);
      if (islower(c)){
       which=0; 
       switch (c){
@@ -122,7 +122,7 @@ void act(int which){
            //Serial.print("Switching on ");
            //Serial.println(f+1);
            mySwitch.switchOn(1,f+1);
-           Serial.print(char('A'+f));
+           Serial.println(char('A'+f));
          }
      }
      which=0;
@@ -135,7 +135,7 @@ void act(int which){
            //Serial.print("Switching off ");
            //Serial.println(f+1);
            mySwitch.switchOff(1,f+1);
-           Serial.print(char('a'+f));
+           Serial.println(char('a'+f));
            
          }
     }
