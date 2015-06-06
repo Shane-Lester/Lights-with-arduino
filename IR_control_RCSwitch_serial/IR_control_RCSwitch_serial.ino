@@ -44,7 +44,7 @@ void loop()   /*----( LOOP: RUNS CONSTANTLY )----*/
   int which=0;// nothing to do
   if (irrecv.decode(&results)) // have we received an IR signal?
        {
-    Serial.println(results.value, HEX);  //UN Comment to see raw values
+    //Serial.println(results.value, HEX);  //UN Comment to see raw values
     which=translateIR(); 
     irrecv.resume(); // receive the next value
   }  

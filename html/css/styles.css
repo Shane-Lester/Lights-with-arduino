@@ -1,0 +1,35 @@
+
+       button {
+                        display: block;
+                        margin: 5px 5px 5px 5px;
+                        width: 240px;
+                        height: 45px;
+                        font-size: 24pt;
+                        font-weight: bold;
+                        color: white;
+			
+                }
+	span {
+                        display: block;
+                        margin: 5px 5px 5px 5px;
+                        width: 240px;
+                        height: 45px;
+                        font-size: 24pt;
+                        font-weight: bold;
+                        color: black;
+			background-color:blue;
+			
+                }
+		.auto{ background-color:red;
+		}
+		.manual{background-color:black;}
+
+		button.ON{background-color:red;}
+	
+		button.OFF{background-color:black;}
+		button.NEUTRAL{background-color:blue;}
+		button.STATIC{background-color:grey;}
+		
+			
+			
+

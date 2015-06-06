@@ -18,9 +18,6 @@ sun=ephem.Sun()
 
 
 def suntime():
-    global home
-    global sun
-
     
     sun.compute(home)
 
@@ -46,15 +43,16 @@ HOUR_ON,MIN_ON,MORN_OFF,MORNMIN_OFF=suntime()#use sunset times
 BASE_ON=MIN_ON
 BASE_OFF=MIN_OFF
 MORN_ON,MORNMIN_ON=6,30
-#MORN_OFF,MORNMIN_OFF=7,0
+MORN_OFF,MORNMIN_OFF=7,0
 AUTOMAN = "AUTO"
 hall,lounge,upstairs=0,0,0
-rand=True
-morning=1
+rand=1
+morning=0
 serial=Serial("/dev/ttyACM0",9600)
+active =0
 webiopi.sleep(2)
 
-if (rand==True):
+if (rand):
 
     MIN_ON=BASE_ON+random.randint(-15,15)
     if (MIN_ON<0):
@@ -71,7 +69,6 @@ active = 0
 numberLights=3 #how many lights are plugged in
 # setup function is automatically called at WebIOPi startup
 def setup():
-    global active    
    
     # retrieve current datetime
     now = datetime.now()
@@ -92,13 +89,6 @@ def setup():
 # loop function is repeatedly called by WebIOPi 
 def loop():
     global active
-    global numberLights
-    global AUTOMAN
-    global MIN_ON
-    global MIN_OFF
-    global morning
-    global rand
-    
     
     # retrieve current datetime
     now = datetime.now()
@@ -134,14 +124,14 @@ def loop():
             webiopi.debug("morning")
             allOn(numberLights)
 
-    if ((now.hour==MORN_OFF) and (now.minute==MORNMIN_OFF) and (now.second==0)):
+    if ((now.hour==MORN_OFF) and (now.minute==MORNMIN_OFF) and (now.second<3)):
             #always switch off in the morning
             allOff(numberLights)
             #lightoff(1,3)
 
 
       #at 1 am randomise the time if rand button ticked- check time first
-    if ((rand==True)and (now.hour==1) and (now.minute==0) and (now.second==0)):
+    if ((rand)and (now.hour==1) and (now.minute==0) and (now.second==0)):
         newhour,BASE_ON,newrisehour,BASEOFF=suntime()
 
         MIN_ON=BASE_ON + random.randint(-15,15)
@@ -183,9 +173,6 @@ def destroy():
 
 
 def room(incoming):
-    global lounge
-    global hall
-    global upstairs
     webiopi.debug("Room ")
     webiopi.debug(incoming)
     if (incoming=='a'):
@@ -218,33 +205,24 @@ def compare_time(now,start_hour,start_min,stop_hour,stop_min):
 
 @webiopi.macro
 def sendLounge():
-    global lounge
     webiopi.debug("lounge %s"%(str(lounge)))
     return lounge
 
 @webiopi.macro
 def sendHall():
-    global hall
     webiopi.debug("hall %s"%(str(hall)))
     return hall
 
 @webiopi.macro
 def sendUpstairs():
-    global upstairs
     webiopi.debug("upstairs %d"%(upstairs))
     return upstairs
 
 @webiopi.macro
 def update():
-    global lounge,hall,upstairs
-    global morning
-    global rand
-    if (rand==True):
-        random=1
-    else:
-        random=0
 
-    return "%d:%d"%(morning,random)
+    webiopi.debug( "%d:%d:%s:%s:%s"%(morning,rand,AUTOMAN,hall,lounge))
+    return "%d:%d:%s:%s:%s"%(morning,rand,AUTOMAN,hall,lounge)
 
 @webiopi.macro
 def light(num1,num2):
@@ -302,9 +280,9 @@ def lightoff(num1,num2):
 def toggleRandom():
     global rand
     if (rand):
-        rand=False
+        rand=0
     else:
-        rand=True
+        rand=1
     return
 
 @webiopi.macro
