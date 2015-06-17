@@ -69,6 +69,9 @@ active = 0
 numberLights=3 #how many lights are plugged in
 # setup function is automatically called at WebIOPi startup
 def setup():
+    global active, numberLights,morning, rand, MIN_ON,MIN_OFF, BASE_ON,BASE_OFF
+    global MORN_ON, MORNMIN_OFF, AUTOMAN
+    
    
     # retrieve current datetime
     now = datetime.now()
@@ -88,7 +91,8 @@ def setup():
        
 # loop function is repeatedly called by WebIOPi 
 def loop():
-    global active
+    global active, numberLights,morning, rand, MIN_ON,MIN_OFF, BASE_ON,BASE_OFF
+    global MORN_ON, MORNMIN_OFF, AUTOMAN
     
     # retrieve current datetime
     now = datetime.now()
@@ -173,6 +177,7 @@ def destroy():
 
 
 def room(incoming):
+    global hall,lounge,upstairs
     webiopi.debug("Room ")
     webiopi.debug(incoming)
     if (incoming=='a'):
@@ -205,21 +210,25 @@ def compare_time(now,start_hour,start_min,stop_hour,stop_min):
 
 @webiopi.macro
 def sendLounge():
+    global lounge
     webiopi.debug("lounge %s"%(str(lounge)))
     return lounge
 
 @webiopi.macro
 def sendHall():
+    global hall
     webiopi.debug("hall %s"%(str(hall)))
     return hall
 
 @webiopi.macro
 def sendUpstairs():
+    global upstairs
     webiopi.debug("upstairs %d"%(upstairs))
     return upstairs
 
 @webiopi.macro
 def update():
+    global morning,rand,AUTOMAN,hall,lounge
 
     webiopi.debug( "%d:%d:%s:%s:%s"%(morning,rand,AUTOMAN,hall,lounge))
     return "%d:%d:%s:%s:%s"%(morning,rand,AUTOMAN,hall,lounge)
