@@ -51,20 +51,22 @@ function init(){
 		}
 
 	function updateReturn(macro, args, response){
+ 		if (!response){return;}
 		var togs=response.split(":");
 		if(togs[0]=='1'){
 			$("#morning").prop("checked",true);}
 		else{
 			$("#morning").prop("checked",false);}
 		if (togs[1]=='1'){
-			$("#random").prop("checked", true);}
-		else{
-			$("#random").prop("checked",false);}
+			$("#rand").prop("checked", true);
+   				}
+		else {
+			$("#rand").prop("checked",false);
 		}
 		modeCallBack(null,null,togs[2]);
 		setLounge(null,null,togs[3]);
 		setHall(null,null,togs[4]);
-		
+	}	
 
 
 	function getLounge(){
@@ -95,15 +97,23 @@ function init(){
 	//define function to update the auto on off times from python and switch to auto after it is run
 	function updateLightHours(macro,args,response){
 		var hours=response.split(":");
-		$("#onTime").text("On:  "+hours[0]+":"+hours[1]);
-		$("#offTime").text("Off: "+hours[2]+":"+ hours[3]);
+                var tempMinOn = ((hours[1].length) <2)?"0" + hours[1]: hours[1];
+                var tempMinOff = ((hours[3].length) <2)?"0" + hours[3]: hours[3];
+                var tempHourOn = ((hours[0].length) <2)?"0" + hours[0]: hours[0];
+                var tempHourOff = ((hours[2].length) <2)?"0" + hours[2]: hours[2];
+		$("#onTime").text("On:  "+tempHourOn+":"+tempMinOn);
+		$("#offTime").text("Off: "+tempHourOff+":"+ tempMinOff);
 		$("#sendButton").prop("class","STATIC");
 					}
 
 	//create sendButton
 	function callSendButton(){
 		$("#sendButton").attr("class","ON");
-		var hours=[$("#inputOn").val(),$("#inputOnMin").val(),$("#inputOff").val(),$("#inputOffMin").val()];
+                var tempInOn =$("#inputOn").val() || 100;
+                var tempInMinOn = $("#inputOnMin").val() || 100;
+                var tempInOff = $("#inputOff").val() || 100;
+                var tempInMinOff = $("#inputOffMin").val() || 100;
+		var hours=[tempInOn, tempInMinOn,tempInOff, tempInMinOff];
 		webiopi().callMacro("setLightHours",hours,updateLightHours);
 		}
 			
