@@ -90,7 +90,7 @@ def setup():
        
 # loop function is repeatedly called by WebIOPi 
 def loop():
-    global active, numberLights, morning, rand, MIN_OFF, MORN_OFF, MORNMIN_OFF, MORN_ON, MORNMIN_ON
+    global active, numberLights, morning, rand, MIN_ON,MIN_OFF, MORN_OFF, MORNMIN_OFF, MORN_ON, MORNMIN_ON
     global BASE_ON, BASE_OFF
     
     # retrieve current datetime
