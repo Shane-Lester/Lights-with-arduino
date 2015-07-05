@@ -5,7 +5,7 @@ function init(){
 		//bind mode button to togglemode function
 		$("#mode").on("click",toggleMode);
 		
-		setInterval(updateUI,5000);
+		setInterval(updateUI,3000);
 			              
        		 };
 

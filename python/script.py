@@ -69,9 +69,10 @@ active = 0
 numberLights=3 #how many lights are plugged in
 # setup function is automatically called at WebIOPi startup
 def setup():
+    global active, numberLights,morning, rand, MIN_ON,MIN_OFF, BASE_ON,BASE_OFF
+    global MORN_ON, MORNMIN_OFF, AUTOMAN
+    
    
-    global active
-
     # retrieve current datetime
     now = datetime.now()
    
@@ -90,8 +91,8 @@ def setup():
        
 # loop function is repeatedly called by WebIOPi 
 def loop():
-    global active, numberLights, morning, rand, MIN_ON,MIN_OFF, MORN_OFF, MORNMIN_OFF, MORN_ON, MORNMIN_ON
-    global BASE_ON, BASE_OFF
+    global active, numberLights,morning, rand, MIN_ON,MIN_OFF, BASE_ON,BASE_OFF
+    global MORN_ON, MORNMIN_OFF, AUTOMAN
     
     # retrieve current datetime
     now = datetime.now()
@@ -176,7 +177,7 @@ def destroy():
 
 
 def room(incoming):
-    global hall, lounge, upstairs
+    global hall,lounge,upstairs
     webiopi.debug("Room ")
     webiopi.debug(incoming)
     if (incoming=='a'):
@@ -221,12 +222,13 @@ def sendHall():
 
 @webiopi.macro
 def sendUpstairs():
+    global upstairs
     webiopi.debug("upstairs %d"%(upstairs))
     return upstairs
 
 @webiopi.macro
 def update():
-    global morning, rand, AUTOMAN, hall, lounge
+    global morning,rand,AUTOMAN,hall,lounge
 
     webiopi.debug( "%d:%d:%s:%s:%s"%(morning,rand,AUTOMAN,hall,lounge))
     return "%d:%d:%s:%s:%s"%(morning,rand,AUTOMAN,hall,lounge)
@@ -303,20 +305,14 @@ def setLightHours(hour,minute,hourOff,minuteOff):
     global AUTOMAN
     global HOUR_ON,MIN_ON, HOUR_OFF,MIN_OFF
     
-    
-    if (int(hour) != 100):
-        HOUR_ON=int(hour)
-    if (int(minute) != 100):
-        MIN_ON=int(minute)
-   
+    HOUR_ON=int(hour)
+    MIN_ON=int(minute)
     if (MIN_ON>59):
         MIN_ON=59
     if (MIN_ON<0):
         MIN_ON=0
-    if (int(hourOff)!=100):
-        HOUR_OFF=int(hourOff)
-    if(int(minuteOff) !=100):
-        MIN_OFF=int(minuteOff)
+    HOUR_OFF=int(hourOff)
+    MIN_OFF=int(minuteOff)
     if (MIN_OFF>59):
         MIN_OFF=59
     if (MIN_OFF<0):
