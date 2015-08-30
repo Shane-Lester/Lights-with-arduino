@@ -1,4 +1,4 @@
-** Raspberry API based lights control system
+** Raspberry Pi based lights control system
 
 - uses serial protocol to control Arduino via USB
 
