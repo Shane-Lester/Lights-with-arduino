@@ -135,20 +135,25 @@ def loop():
 
 
       #at 1 am randomise the time if rand button ticked- check time first
-    if ((rand)and (now.hour==1) and (now.minute==0) and (now.second==0)):
-        newhour,BASE_ON,newrisehour,BASEOFF=suntime()
+    if ((now.hour==1) and (now.minute==0) and (now.second==0)):
+        if (rand):
+            newhour,BASE_ON,newrisehour,BASEOFF=suntime()
 
-        MIN_ON=BASE_ON + random.randint(-15,15)
-        if (MIN_ON<0):
-            MIN_ON=0
-        if (MIN_ON>59):
-            MIN_ON=59
-        
-        MIN_OFF=BASE_OFF + random.randint(-15,15)
-        if (MIN_OFF<0):
-            MIN_OFF=0
-        if (MIN_OFF>59):
-            MIN_OFF=59
+            MIN_ON=BASE_ON + random.randint(-15,15)
+            if (MIN_ON<0):
+                MIN_ON=0
+            if (MIN_ON>59):
+                MIN_ON=59
+            
+            MIN_OFF=BASE_OFF + random.randint(-15,15)
+            if (MIN_OFF<0):
+                MIN_OFF=0
+            if (MIN_OFF>59):
+                MIN_OFF=59
+
+        else:
+            HOUR_ON,MIN_ON,MORN_OFF,MORNMIN_OFF=suntime()            
+            
         
         
     # toggle light ON all days at the correct time
